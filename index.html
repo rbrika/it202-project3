@@ -4,8 +4,56 @@
 
 <canvas id="myCanvas" width="500" height="300" style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas>
+    <input placeholder="Click here, then press down a key." size="40">
+<p id="log"></p>
+    
 
 <script>
+    var deltaX = 0;
+var deltaY = 0;
+    const input = document.querySelector('input');
+const log = document.getElementById('log');
+
+input.addEventListener('keydown', logKey);
+window.addEventListener("keydown", keysPressed);
+    var keys = [];
+ 
+function keysPressed(e) {
+    // store an entry for every key pressed
+    keys[e.keyCode] = true;
+ 
+    // left
+    if (keys[37]) {
+      deltaX -= 2;
+    }
+ 
+    // right
+    if (keys[39]) {
+      deltaX += 2;
+    }
+ 
+    // down
+    if (keys[38]) {
+      deltaY -= 2;
+    }
+ 
+    // up
+    if (keys[40]) {
+      deltaY += 2;
+    }
+ 
+    e.preventDefault();
+ 
+    draw();
+}
+ 
+function keysReleased(e) {
+    // mark keys that were released
+    keys[e.keyCode] = false;
+}     
+function logKey(e) {
+  log.textContent += ` ${e.code}`;
+}
 var c = document.getElementById("myCanvas");
 var ctx = c.getContext("2d");
 // var x=100;
@@ -13,11 +61,12 @@ var ctx = c.getContext("2d");
 // var r=50;
 var geo={x:100, y:75, r:10, color:"red", speed:1}
 var geo2={x:100, y:105, r:20,color:"yellow", speed:1 }
+
 function draw(){
   //0,0 is the top left corenr
   ctx.clearRect(0,0,c.width,c.height);
   ctx.beginPath();
-  ctx.arc(geo.x, geo.y, geo.r, 0, 2 * Math.PI);
+  ctx.arc(geo.x+deltaX, geo.y+deltaY, geo.r, 0, 2 * Math.PI);
   ctx.fillStyle=geo.color;
   ctx.fill();
   
@@ -26,6 +75,15 @@ function draw(){
   ctx.arc(geo2.x, geo2.y, geo2.r, 0, 2 * Math.PI);
   ctx.fillStyle=geo2.color;
   ctx.fill();
+    
+    var dx = geo.x - geo2.x;
+var dy = geo.y - geo2.y;
+var distance = Math.sqrt(dx * dx + dy * dy);
+
+if (distance < geo.r + geo2.r) {
+    // collision detected!
+    geo.color="blue";
+}
   if(geo.x==c.width+geo.r){
     geo.x=-geo.r;
     geo.y= Math.random() *(c.height-0)+0;
@@ -37,9 +95,9 @@ function draw(){
   if(geo2.x==c.width+geo2.r){
     geo2.x=-geo2.r;
   }
-  else{
-    geo2.x+=geo2.speed;
-  }
+//   else{
+//     geo2.x+=geo2.speed;
+//   }
   
   
   window.requestAnimationFrame(draw);
