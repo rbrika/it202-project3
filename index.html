@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
 <body>
-
+<div id="stat">
+    <p id="lives">Lives: 10</p>
+    <p id="score">Score: 0</p>
+    </div>
 <canvas id="myCanvas" width="500" height="300" style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas>
 <p id="log" style="width:auto;"></p>
@@ -18,104 +21,74 @@ window.addEventListener("keydown", keysPressed);
 function keysPressed(e) {
     // store an entry for every key pressed
     e.keyCode;
- 
     // left
-    if (e.keyCode=='37') {
-    }
- 
+    if (e.keyCode=='37') {}
     // right
-    if (e.keyCode=='39') {
-
-    }
- 
+    if (e.keyCode=='39') {} 
     // up
     if (e.keyCode=='38') {
       player.y=player.y-player.speed;
     }
- 
     // down
     if (e.keyCode=='40') {
       player.y=player.y+player.speed;
     }
-    e.preventDefault();
-    
 }
- 
- 
-function logKey(e) {
-  log.textContent += ` ${e.code}`;
-}
+var score=0;
+    var live=10;
 var c = document.getElementById("myCanvas");
+var lives = document.getElementById("lives");
+var scores = document.getElementById("score");
 var ctx = c.getContext("2d");
-var geo={x:100, y:75, r:10, color:"red", speed:1, type="harm"}
-var geo2={x:100, y:105, r:20,color:"yellow", speed:1, type="benefit" }
-var player={x:100, y:c.height/2, r:20,color:"green", speed:1, type="player" }
-var arrayG=[geo,geo2,player];
-var gameObjecs=[];
+var gameObjects=[];
+gameObjects.push({x:100, y:75, r:10, color:"red", speed:1, type:"harm"});
+gameObjects.push({x:100, y:105, r:20,color:"yellow", speed:1, type:"benefit"});
+var player={x:100, y:c.height/2, r:20,color:"green", speed:1, type:"player" };
+gameObjects.push(player);
 
 function draw(){
   //0,0 is the top left corenr
   ctx.clearRect(0,0,c.width,c.height);
     for(i in gameObjects){
         geo=gameObjects[i];
+        ctx.beginPath();
         ctx.arc(geo.x, geo.y, geo.r, 0, 2 * Math.PI);
         ctx.fillStyle=geo.color;
         ctx.fill();
         if(geo.type!="player"){
-            geo.x+=geo.speed;
+            //geo.x+=geo.speed;
+            if(colliding(player,geo)){
+                if(geo.type=="harm"){
+                    live-=1;
+                   lives.textContent="Lives:  "+live;
+                   }
+                else if(geo.type=="benefit"){
+                    score+=100;
+                        scores.textContent="Score:  "+score;
+                        }
+            }
+            if(geo.x-geo.r>c.width){
+                geo.x=0-geo.r;
+                geo.y= Math.random() *(c.height-0)+0;
+            }
         }
         
     }
-  ctx.beginPath();
-  ctx.arc(geo.x, geo.y, geo.r, 0, 2 * Math.PI);
-  ctx.fillStyle=geo.color;
-  ctx.fill();
-  
-
-  ctx.beginPath();
-  ctx.arc(geo2.x, geo2.y, geo2.r, 0, 2 * Math.PI);
-  ctx.fillStyle=geo2.color;
-  ctx.fill();
-    
-    ctx.beginPath();
-  ctx.arc(player.x, player.y, player.r, 0, 2 * Math.PI);
-  ctx.fillStyle=player.color;
-  ctx.fill();
-    
-    var dx2 = player.x - geo2.x;
-    var dy2 = player.y - geo2.y;
-    var distance2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
-    var dx1 = player.x - geo.x;
-    var dy1 = player.y - geo.y;
-    var distance1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
-
-    if (distance2 < player.r + geo2.r || distance1 < player.r + geo.r) {
-    // collision detected!
-        player.color="blue";
-        console.log("over");
-        log.textContent="over";
-    }
-    else{
-        player.color="green";
-    }
-
-    
-    geo.x+=geo.speed;
-    //geo2.x+=geo2.speed;
-    if(geo.x-geo.r>c.width){
-        geo.x=0-geo.r;
-        geo.y= Math.random() *(c.height-0)+0;
-    }
-
-    if(geo2.x-geo2.r>c.width){
-        geo2.x=0-geo2.r;
-        geo2.y= Math.random() *(c.height-0)+0;
-    }
-   
-    
     window.requestAnimationFrame(draw);
 }
-
+function colliding(c1,c2){
+    var dx = c1.x - c2.x;
+    var dy = c1.y - c2.y;
+    var distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance < c1.r + c2.r ) {
+    // collision detected!
+//         player.color="blue";
+//         console.log("over");
+//         log.textContent="over";
+         return true;
+    }
+    return false;
+}
 window.requestAnimationFrame(draw);
 </script> 
 
