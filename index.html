@@ -1,9 +1,20 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <style>
+            .flex-parent {
+              display: grid;
+  grid-template-columns: 1fr 1fr
+            }
+            .flex-child {
+              flex: 1;
+            }
+        </style>
+    </head>
 <body>
-<div id="stat">
-    <p id="lives">Lives: 10</p>
-    <p id="score">Score: 0</p>
+<div id="stat" class=".flex-parent">
+    <p id="lives" class=".flex-child">Lives: 10</p>
+    <p id="score" class=".flex-child">Score: 0</p>
     </div>
 <canvas id="myCanvas" width="500" height="300" style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas>
@@ -34,6 +45,19 @@ function keysPressed(e) {
       player.y=player.y+player.speed;
     }
 }
+    function component(x, y, r, src, color, speed, type,harm) {
+  this.type = type;
+  if (type == "image") {
+    this.image = new Image();
+    this.image.src = src;
+  }
+  this.x = x;
+  this.y = y;
+  this.r = r;
+  this.color = color; 
+  this.harm = harm;
+  this.speed = speed; 
+}
 var score=0;
     var live=10;
 var c = document.getElementById("myCanvas");
@@ -41,38 +65,54 @@ var lives = document.getElementById("lives");
 var scores = document.getElementById("score");
 var ctx = c.getContext("2d");
 var gameObjects=[];
-gameObjects.push({x:100, y:75, r:10, color:"red", speed:1, type:"harm"});
-gameObjects.push({x:100, y:105, r:20,color:"yellow", speed:1, type:"benefit"});
-var player={x:100, y:c.height/2, r:20,color:"green", speed:1, type:"player" };
+    gameObjects.push(new component(100,75,10,"https://i.pinimg.com/originals/cb/8e/03/cb8e03cd797e9fae1ad104a545bde800.png","red",1,"image","harm"));
+ gameObjects.push(new component(100,105,20,"https://i.pinimg.com/originals/b4/f7/32/b4f732b6edb32c576a39864dd51f8aad.png","yellow",1,"image","benefit"));
+ var player=new component(100,c.height/2,20,"https://tommo2304.files.wordpress.com/2014/06/main.png","green",1,"image","player");
 gameObjects.push(player);
-
+var type=0;
 function draw(){
   //0,0 is the top left corenr
   ctx.clearRect(0,0,c.width,c.height);
     for(i in gameObjects){
         geo=gameObjects[i];
         ctx.beginPath();
-        ctx.arc(geo.x, geo.y, geo.r, 0, 2 * Math.PI);
-        ctx.fillStyle=geo.color;
-        ctx.fill();
-        if(geo.type!="player"){
+        if(geo.type=="image"){
+            ctx.drawImage(geo.image, 
+        geo.x-geo.r, 
+        geo.y-geo.r,
+        geo.r*2,geo.r*2);
+           
+        }
+        else{
+            ctx.arc(geo.x, geo.y, geo.r, 0, 2 * Math.PI);
+            ctx.fillStyle=geo.color;
+            ctx.fill();
+        }
+        if(geo.harm!="player"){
             //geo.x+=geo.speed;
             if(colliding(player,geo)){
-                if(geo.type=="harm"){
-                    live-=1;
-                   lives.textContent="Lives:  "+live;
-                   }
-                else if(geo.type=="benefit"){
-                    score+=100;
-                        scores.textContent="Score:  "+score;
-                        }
+                if(geo.harm=="harm"){
+                    type=1;
+                }
+                else if(geo.harm=="benefit"){
+                    type=2;
+                }
             }
-            if(geo.x-geo.r>c.width){
+        }
+        if(geo.x-geo.r>c.width){
                 geo.x=0-geo.r;
                 geo.y= Math.random() *(c.height-0)+0;
             }
+        if(type==1){
+                live-=1;
+                lives.textContent="Lives:  "+live;
+            type=0;
+            }
+        else  if(type==2){
+                score+=100;
+                scores.textContent="Score:  "+score;
+            type=0;
         }
-        
     }
     window.requestAnimationFrame(draw);
 }
@@ -81,10 +121,6 @@ function colliding(c1,c2){
     var dy = c1.y - c2.y;
     var distance = Math.sqrt(dx * dx + dy * dy);
     if (distance < c1.r + c2.r ) {
-    // collision detected!
-//         player.color="blue";
-//         console.log("over");
-//         log.textContent="over";
          return true;
     }
     return false;
