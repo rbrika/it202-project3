@@ -13,18 +13,18 @@
     </head>
 <body>
 <div id="stat" class=".flex-parent">
-    <p id="lives" class=".flex-child">Lives: 10</p>
-    <p id="score" class=".flex-child">Score: 0</p>
+<!--     <p id="lives" class=".flex-child">Lives: 10</p>
+    <p id="score" class=".flex-child">Score: 0</p> -->
     </div>
 <canvas id="myCanvas" width="500" height="300" style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas>
-<p id="log" style="width:auto;"></p>
+<!-- <p id="log" style="width:auto;"></p> -->
     
 
 <script>
     var deltaX = 0;
 var deltaY = 0;
-const log = document.getElementById('log');
+//const log = document.getElementById('log');
 
 window.addEventListener("keydown", keysPressed);
     var keys = [];
@@ -56,23 +56,28 @@ function keysPressed(e) {
   this.r = r;
   this.color = color; 
   this.harm = harm;
-  this.speed = speed; 
+  this.speed = speed;
 }
 var score=0;
-    var live=10;
+    var live=3;
 var c = document.getElementById("myCanvas");
-var lives = document.getElementById("lives");
-var scores = document.getElementById("score");
 var ctx = c.getContext("2d");
 var gameObjects=[];
     gameObjects.push(new component(100,75,10,"https://i.pinimg.com/originals/cb/8e/03/cb8e03cd797e9fae1ad104a545bde800.png","red",1,"image","harm"));
  gameObjects.push(new component(100,105,20,"https://i.pinimg.com/originals/b4/f7/32/b4f732b6edb32c576a39864dd51f8aad.png","yellow",1,"image","benefit"));
- var player=new component(100,c.height/2,20,"https://tommo2304.files.wordpress.com/2014/06/main.png","green",1,"image","player");
+ var player=new component(c.width/2,c.height/2,20,"https://tommo2304.files.wordpress.com/2014/06/main.png","green",3,"image","player");
 gameObjects.push(player);
+    var level =1;
 var type=0;
+    var img= new Image();
+    img.src="background.jpeg";
 function draw(){
   //0,0 is the top left corenr
   ctx.clearRect(0,0,c.width,c.height);
+    ctx.drawImage(img,0,0,c.width,c.height);
+    ctx.font = "30px Comic Sans MS";
+ctx.fillStyle = "red";
+
     for(i in gameObjects){
         geo=gameObjects[i];
         ctx.beginPath();
@@ -89,8 +94,9 @@ function draw(){
             ctx.fill();
         }
         if(geo.harm!="player"){
-            //geo.x+=geo.speed;
+            geo.x-=geo.speed*level;
             if(colliding(player,geo)){
+                geo.collision=true;
                 if(geo.harm=="harm"){
                     type=1;
                 }
@@ -99,22 +105,36 @@ function draw(){
                 }
             }
         }
-        if(geo.x-geo.r>c.width){
-                geo.x=0-geo.r;
+        if((geo.x-geo.r<0)|| geo.collision==true){
+                geo.x=c.width-geo.r;
                 geo.y= Math.random() *(c.height-0)+0;
+            geo.collision=false;
             }
         if(type==1){
                 live-=1;
-                lives.textContent="Lives:  "+live;
             type=0;
             }
         else  if(type==2){
                 score+=100;
-                scores.textContent="Score:  "+score;
+            if(score%200==0){
+                level++;
+                }
             type=0;
         }
     }
+    ctx.fillText("Lives: "+live, 10, 30);
+    ctx.fillText("Score: "+score, 300, 30); 
+    if(live==0){
+        ctx.clearRect(0,0,c.width,c.height);
+    ctx.drawImage(img,0,0,c.width,c.height);
+        ctx.textAlign = "center";
+         ctx.fillText("Game Over",c.width/2, c.height/2); 
+    }
+    else{
     window.requestAnimationFrame(draw);
+    }
+    
+    
 }
 function colliding(c1,c2){
     var dx = c1.x - c2.x;
